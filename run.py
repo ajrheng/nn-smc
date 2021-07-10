@@ -1,5 +1,5 @@
 import torch
-import math
+from datetime import datetime
 import torch.nn as nn
 import torch.nn.functional as F
 import numpy as np
@@ -29,10 +29,12 @@ if __name__ == "__main__":
     net = model()
     net.load_state_dict(torch.load("./files/model.pt"))
     net.eval()
-
-    if not os.path.exists(directory):
-        os.makedirs(directory)
-    log_path = os.path.join(directory, "log.txt")
+    
+    time = datetime.now().strftime("%Y_%m_%d_%H%M%S")
+    run_path = os.path.join(directory, time)
+    if not os.path.exists(run_path):
+        os.makedirs(run_path)
+    log_path = os.path.join(run_path, "log.txt")
 
     true_omegas = []
     nn_preds = []
@@ -79,9 +81,41 @@ if __name__ == "__main__":
         crb_list.append(smc.crb_list)
         
         with open(log_path, 'a') as out_file:
-            out_file.write("True omega: {:f}, pred: {:f}, n_resample: {:d}, n_restarts: {:d}".format(true_omega,
+            out_file.write("Run {:d} \n".format(i))
+            out_file.write("True omega: {:f}, pred: {:f}, n_resample: {:d}, n_restarts: {:d} \n".format(true_omega,
                                                                                     smc.curr_omega_est,
                                                                                     resample_counts,
                                                                                     restart_counts))
-            out_file.write("Final standard deviation: {}".format(final_std))
+            out_file.write("Final standard deviation: {}\n".format(final_std))
+            out_file.write("-------------------------------\n\n")
+        
 
+    results_path = os.path.join(run_path, "results.txt")
+
+    avg_restarts = np.mean(restart_list)
+    nn_data_sq = ( np.array(nn_data) - np.array(true_omegas).reshape(-1,1)) ** 2
+    nn_data_mean = np.mean(nn_data_sq, axis=0)
+    nn_data_median = np.median(nn_data_sq, axis =0)
+
+    cred_reg_data = np.array(cred_reg_data).mean(axis=0)
+    cred_reg_min = cred_reg_data[:, 0]
+    cred_reg_max = cred_reg_data[:, 1]
+
+    with open(results_path, 'a') as out_file:
+        out_file.write("Restart counts {}\n".format(avg_restarts))
+        out_file.write("MSE: {}, Median: {}\n".format(nn_data_mean[-1], nn_data_median[-1]))
+
+    n_iters_arr = np.arange(max_iters, dtype=int)
+
+    f = plt.figure()
+    plt.plot(n_iters_arr, nn_data_mean, label='Mean')
+    plt.plot(n_iters_arr, nn_data_median, label='Median')
+    plt.fill_between(n_iters_arr, cred_reg_max, cred_reg_min, alpha=0.4)
+    plt.legend()
+    plt.xlabel("Iterations")
+    plt.ylabel("$(\omega - \omega*)^2$")
+    plt.yscale('log')
+    plt.xlim([0, max_iters])
+    plt.tight_layout()
+    fig_path = os.path.join(run_path, "smc_results.png")
+    f.savefig(fig_path, dpi=300)

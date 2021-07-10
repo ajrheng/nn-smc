@@ -95,14 +95,11 @@ if __name__ == "__main__":
     test_loss_arr = []
 
     directory = config['directory']
-    if not os.path.exists(directory):
-        os.makedirs(directory)
-
     timestamp = datetime.now().strftime("%Y_%m_%d_%H%M%S")    
-    current_run_path = os.path.join(directory, timestamp)
-    if not os.path.exists(current_run_path):
-        os.makedirs(current_run_path)
-    log_path = os.path.join(current_run_path, 'log.txt')
+    run_path = os.path.join(directory, timestamp)
+    if not os.path.exists(run_path):
+        os.makedirs(run_path)
+    log_path = os.path.join(run_path, 'log.txt')
 
     for e in range(n_epochs):
 

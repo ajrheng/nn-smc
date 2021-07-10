@@ -2,6 +2,6 @@ t0: 5
 n_particles: 1000 # number of SMC particles (num of w points)
 n_bins: 50 # number of bins
 max_iters: 150 # maximum number of iterations before breaking
-n_runs: 30
+n_runs: 50
 directory: ./run_logs
 data_filename: data
