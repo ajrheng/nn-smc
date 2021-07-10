@@ -1,0 +1,4 @@
+/train_logs/**
+/run_logs/**
+/files/**
+/__pycache__/

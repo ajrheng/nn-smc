@@ -7,7 +7,7 @@ from tqdm import tqdm
 
 if __name__ == "__main__":
 
-    with open("train_config.yaml", 'r') as file:
+    with open("get_data_config.yaml", 'r') as file:
         config = yaml.load(file, Loader=yaml.FullLoader)
 
     n_particles = config['n_particles']

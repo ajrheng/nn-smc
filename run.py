@@ -17,7 +17,7 @@ from src.smc import phase_est_smc
 
 if __name__ == "__main__":
 
-    with open("get_data_config.yaml", 'r') as file:
+    with open("run_config.yaml", 'r') as file:
         config = yaml.load(file, Loader=yaml.FullLoader)
 
     n_particles = config['n_particles']
@@ -31,7 +31,7 @@ if __name__ == "__main__":
     net.eval()
 
     if not os.path.exists(directory):
-        os.makedir(directory)
+        os.makedirs(directory)
     log_path = os.path.join(directory, "log.txt")
 
     true_omegas = []
