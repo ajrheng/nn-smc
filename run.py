@@ -17,7 +17,7 @@ from src.smc import phase_est_smc
 
 if __name__ == "__main__":
 
-    with open("run_config.yaml", 'r') as file:
+    with open("./config/run_config.yaml", 'r') as file:
         config = yaml.load(file, Loader=yaml.FullLoader)
 
     n_particles = config['n_particles']

@@ -77,7 +77,7 @@ def load_data():
 if __name__ == "__main__":
 
     
-    with open("train_config.yaml", 'r') as file:
+    with open("./config/train_config.yaml", 'r') as file:
         config = yaml.load(file, Loader=yaml.FullLoader)
 
     device = torch.device('cpu')
