@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 from tqdm import tqdm
 import yaml
 import os
+import argparse
 import seaborn as sns
 sns.set()
 
@@ -17,7 +18,19 @@ from src.smc import phase_est_smc
 
 if __name__ == "__main__":
 
-    with open("./config/run_config.yaml", 'r') as file:
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        '--resampler',
+        choices = ['nn', 'lw'],
+        type=str,
+        help='Type of resampler. nn or lw'
+    )
+    args, _ = parser.parse_known_args()
+
+    config_file = "run_config_" + args.resampler + ".yaml"
+    config_path = os.path.join("./config", config_file)
+
+    with open(config_path, 'r') as file:
         config = yaml.load(file, Loader=yaml.FullLoader)
 
     n_particles = config['n_particles']
@@ -25,13 +38,14 @@ if __name__ == "__main__":
     t0 = config['t0']
     max_iters = config['max_iters']
     directory = config['directory']
+    n_eff_thresh = config['n_eff_thresh']
 
     net = model()
     net.load_state_dict(torch.load("./files/model.pt"))
     net.eval()
     
     time = datetime.now().strftime("%Y_%m_%d_%H%M%S")
-    run_path = os.path.join(directory, time)
+    run_path = os.path.join(directory, args.resampler, time)
     if not os.path.exists(run_path):
         os.makedirs(run_path)
     log_path = os.path.join(run_path, "log.txt")
@@ -62,14 +76,17 @@ if __name__ == "__main__":
                 if smc.break_flag is True:
                     break
                 else:
-                    batch, _, edges = smc.sample_from_posterior(n_batch = n_particles)
-                    batch = torch.from_numpy(batch).float()
-                    predictions = net(batch).detach().numpy()
-                    smc.convert_to_particles(predictions, edges)
+                    if args.resampler == 'nn':
+                        batch, _, edges = smc.sample_from_posterior(n_batch = n_particles)
+                        batch = torch.from_numpy(batch).float()
+                        predictions = net(batch).detach().numpy()
+                        smc.convert_to_particles(predictions, edges)
+                    elif args.resampler == 'lw':
+                        smc.liu_west_resample()
                     resample_counts += 1
 
             final_std = smc.std_list[-1]
-            if final_std < 1e-7:
+            if final_std < n_eff_thresh:
                 break
 
             restart_counts += 1

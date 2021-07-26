@@ -1,0 +1,7 @@
+t0: 10
+n_particles: 1000 # number of SMC particles (num of w points)
+max_iters: 100 # maximum number of iterations before breaking
+n_runs: 50
+n_eff_thresh: 1e-6
+directory: ./run_logs
+data_filename: data

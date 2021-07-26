@@ -123,7 +123,30 @@ class phase_est_smc:
         
         self.particle_pos = self.rng.choice(self.particle_pos, size = self.num_particles, p=self.particle_wgts)
         self.particle_wgts = np.ones(self.num_particles) * 1/self.num_particles
+
+    def liu_west_resample(self, a=0.98):
+        """
+        Liu-West resampler
+        """
         
+        # e_x2 = np.average(self.particle_pos**2, weights=self.particle_wgts)
+        mu = np.average(self.particle_pos, weights=self.particle_wgts)
+        var = weighted_std(self.particle_pos, self.particle_wgts) ** 2
+        var = (1-a**2) * var
+
+        if var < 0:
+            print("VAR LESS THAN")
+            self.curr_omega_est = np.average(self.particle_pos, weights = self.particle_wgts)
+            self.break_flag = True
+            return
+
+        new_particle_pos = self.rng.choice(self.particle_pos, size=self.num_particles, p=self.particle_wgts)
+        for i in range(len(new_particle_pos)):
+            mu_i = a * new_particle_pos[i] + (1-a) * mu
+            new_particle_pos[i] = self.rng.normal(loc=mu_i, scale=np.sqrt(var))  ## scale is standard deviation
+
+        self.particle_pos = np.copy(new_particle_pos)
+        self.particle_wgts = np.ones(self.num_particles) * 1/self.num_particles ## set all weights to 1/N again
  
     def sample_from_posterior(self, n_batch=100, n_samples=10000, n_bins=50):
 

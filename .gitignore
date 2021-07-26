@@ -2,3 +2,4 @@
 /run_logs/**
 /files/**
 /__pycache__/
+.vscode/

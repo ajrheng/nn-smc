@@ -128,11 +128,12 @@ if __name__ == "__main__":
 
         torch.save(net.state_dict(), './files/model.pt')
 
-    fig_path = os.path.join(current_run_path, 'training_curve.png')
+    fig_path = os.path.join(run_path, 'training_curve.png')
     f = plt.figure()
-    plt.plot(train_loss_arr)
-    plt.plot(test_loss_arr)
-    plt.xlabel("Iterations")
+    plt.plot(train_loss_arr, label='Train Loss')
+    plt.plot(test_loss_arr, label='Test Loss')
+    plt.xlabel("Epochs")
     plt.ylabel("Loss")
     plt.yscale('log')
+    plt.legend()
     f.savefig(fig_path, dpi=300)
