@@ -1,5 +1,6 @@
-/train_logs/**
-/run_logs/**
-/files/**
-/__pycache__/
+train_logs/
+run_logs/
+files/
+__pycache__/
+*.py[cod]
 .vscode/
