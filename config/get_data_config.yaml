@@ -1,4 +1,4 @@
-t0: 5
+t0: 10
 n_particles: 1000 # number of SMC particles (num of w points)
 n_data: 1000 # number of SMC runs to draw data from
 n_bins: 50 # number of bins
