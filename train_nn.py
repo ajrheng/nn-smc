@@ -83,6 +83,11 @@ if __name__ == "__main__":
     device = torch.device('cpu')
     net = model().to(device)
     net.train()
+
+    lr = config['learning_rate']
+    if isinstance(lr, str):
+        lr = float(lr)
+
     optimizer = optim.Adam(net.parameters(), lr=config['learning_rate'])
     scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=20, gamma=0.5)
     loss_func = nn.KLDivLoss(reduction='batchmean')

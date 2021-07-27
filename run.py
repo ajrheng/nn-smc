@@ -5,14 +5,13 @@ import torch.nn.functional as F
 import numpy as np
 import torch.optim as optim
 import matplotlib.pyplot as plt
-from tqdm import tqdm
 import yaml
 import os
 import argparse
 import seaborn as sns
 sns.set()
 
-from src.mlp import model
+from src.nn import neural_network
 from src.smc import phase_est_smc
 
 
@@ -21,9 +20,9 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument(
         '--resampler',
-        choices = ['nn', 'lw'],
+        choices = ['nn', 'lw', 'bs'],
         type=str,
-        help='Type of resampler. nn or lw'
+        help='Type of resampler. nn or lw or bs'
     )
     args, _ = parser.parse_known_args()
 
@@ -39,10 +38,16 @@ if __name__ == "__main__":
     max_iters = config['max_iters']
     directory = config['directory']
     n_eff_thresh = config['n_eff_thresh']
+    if isinstance(n_eff_thresh, str):
+        n_eff_thresh = float(n_eff_thresh)
 
-    net = model()
-    net.load_state_dict(torch.load("./files/model.pt"))
-    net.eval()
+    if args.resampler == 'nn':
+        model_name = config['model_name']
+        model_path = os.path.join('./files', model_name)
+        units = config['model_neurons']
+        net = neural_network(units)
+        net.load_state_dict(torch.load(model_path))
+        net.eval()
     
     time = datetime.now().strftime("%Y_%m_%d_%H%M%S")
     run_path = os.path.join(directory, args.resampler, time)
@@ -83,6 +88,8 @@ if __name__ == "__main__":
                         smc.convert_to_particles(predictions, edges)
                     elif args.resampler == 'lw':
                         smc.liu_west_resample()
+                    elif args.resampler == 'bs':
+                        smc.bootstrap_resample()
                     resample_counts += 1
 
             final_std = smc.std_list[-1]

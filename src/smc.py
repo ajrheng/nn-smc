@@ -133,13 +133,6 @@ class phase_est_smc:
         mu = np.average(self.particle_pos, weights=self.particle_wgts)
         var = weighted_std(self.particle_pos, self.particle_wgts) ** 2
         var = (1-a**2) * var
-
-        if var < 0:
-            print("VAR LESS THAN")
-            self.curr_omega_est = np.average(self.particle_pos, weights = self.particle_wgts)
-            self.break_flag = True
-            return
-
         new_particle_pos = self.rng.choice(self.particle_pos, size=self.num_particles, p=self.particle_wgts)
         for i in range(len(new_particle_pos)):
             mu_i = a * new_particle_pos[i] + (1-a) * mu

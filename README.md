@@ -1,5 +1,5 @@
 # TITLE OF PROJECT
-This is the repository for the Masters thesis: _____________.
+This is the repository for the Masters thesis: Neural Network Resamplers for Quantum Phase Estimation.
 
 ## Setup
 Run `pip install -r requirements.txt` to install the prerequisites. It is advised to do inside a virtual environment.
@@ -11,6 +11,7 @@ There are four configuration files:
 - `get_data_config.yaml`: Config for generating phase estimation data to train the neural network.
 - `train_config.yaml`: Config for training the neural network.
 - `run_config_nn.yaml`: Config for running SMC with NN resampler on phase estimation.
+- `run_config_bs_yaml`: Config for running SMC with bootstrap (BS) resampler on phase estimation.
 - `run_config_lw.yaml`: Config for running SMC with LW resampler on phase estimation.
 
 ## Neural Network Resampler
@@ -38,9 +39,9 @@ python run.py --resampler nn
 Similarly, a folder with the timestamp is created in `/run_logs/nn`. Inside, `log.txt` outputs the current run and some basic information. After completion, 
 `results.txt` contains the overall MSE and average restarts, and a plot of the mean and median squared error is shown in `smc_results.png`.
 
-## Liu-West Resampler
-For LW, as there is no need for any training, we can proceed to run the resampler directl,
+## Liu-West and Bootstrap Resamplers
+For LW and BS, as there is no need for any training, we can proceed to run the resampler directly,
 ```
-python run.py --resampler lw
+python run.py --resampler [lw,bs]
 ```
-Identical to the NN reasmpler, the same outputs are stored in `/run_logs/lw`.
+Identical to the NN resampler, the same outputs are stored in `/run_logs/lw` or `/run_logs/bs`.
