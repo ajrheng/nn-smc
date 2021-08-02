@@ -40,20 +40,27 @@ if __name__ == "__main__":
     n_eff_thresh = config['n_eff_thresh']
     if isinstance(n_eff_thresh, str):
         n_eff_thresh = float(n_eff_thresh)
-
-    if args.resampler == 'nn':
-        model_name = config['model_name']
-        model_path = os.path.join('./files', model_name)
-        units = config['model_neurons']
-        net = neural_network(units)
-        net.load_state_dict(torch.load(model_path))
-        net.eval()
     
     time = datetime.now().strftime("%Y_%m_%d_%H%M%S")
     run_path = os.path.join(directory, args.resampler, time)
     if not os.path.exists(run_path):
         os.makedirs(run_path)
     log_path = os.path.join(run_path, "log.txt")
+
+    if args.resampler == 'nn':
+
+        architecture_path = os.path.join(run_path, "architecture.txt")
+        architecture =  '_'.join(str(e) for e in config['model_neurons'])
+        with open(architecture_path, 'a') as out_file:
+            out_file.write("Neural network architecture\n")
+            out_file.write(architecture )
+
+        units = config['model_neurons']
+        model_path = './files/' + config['model_filename']
+        net = neural_network(units)
+        net.load_state_dict(torch.load(model_path))
+        net.eval()
+
 
     true_omegas = []
     nn_preds = []
@@ -114,7 +121,6 @@ if __name__ == "__main__":
             out_file.write("-------------------------------\n\n")
         
 
-    results_path = os.path.join(run_path, "results.txt")
 
     avg_restarts = np.mean(restart_list)
     nn_data_sq = ( np.array(nn_data) - np.array(true_omegas).reshape(-1,1)) ** 2
@@ -125,6 +131,7 @@ if __name__ == "__main__":
     cred_reg_min = cred_reg_data[:, 0]
     cred_reg_max = cred_reg_data[:, 1]
 
+    results_path = os.path.join(run_path, "results.txt")
     with open(results_path, 'a') as out_file:
         out_file.write("Restart counts {}\n".format(avg_restarts))
         out_file.write("MSE: {}, Median: {}\n".format(nn_data_mean[-1], nn_data_median[-1]))
@@ -143,3 +150,17 @@ if __name__ == "__main__":
     plt.tight_layout()
     fig_path = os.path.join(run_path, "smc_results.png")
     f.savefig(fig_path, dpi=300)
+
+    if args.resampler == 'nn':
+        result_path = './files/' + 'results_' + architecture
+    elif args.resampler == 'bs':
+        result_path = './files/results_bs'
+    elif args.resampler == 'lw':
+        result_path = './files/results_lw'
+
+    np.savez_compressed(result_path,
+                        mean_se=nn_data_mean,
+                        median_se = nn_data_median,
+                        cred_reg_max = cred_reg_max,
+                        cred_reg_min = cred_reg_min
+                        )

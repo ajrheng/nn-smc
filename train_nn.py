@@ -3,10 +3,10 @@ import torch
 import torch.optim as optim
 import torch.nn as nn
 from sklearn.model_selection import train_test_split
-from tqdm import tqdm
+from src.nn import neural_network
 import sys
 import matplotlib.pyplot as plt
-from src.mlp import model
+from src.nn import model
 import yaml
 import os
 from datetime import datetime
@@ -56,9 +56,9 @@ def test_step(test_batch, test_bin):
     
     return test_loss/test_len
 
-def load_data():
+def load_data(data_filename):
     
-    data_dict = np.load("./files/data.npz")
+    data_dict = np.load(data_filename)
     batch_data = data_dict["batch_data"]
     bin_data = data_dict["bin_data"]
     edge_data = data_dict["edge_data"]
@@ -75,26 +75,33 @@ def load_data():
     return train_data_loader, test_batch, test_bin, test_edge
 
 if __name__ == "__main__":
-
     
     with open("./config/train_config.yaml", 'r') as file:
         config = yaml.load(file, Loader=yaml.FullLoader)
 
     device = torch.device('cpu')
-    net = model().to(device)
+    units = config['model_neurons']
+    net = neural_network(units)
     net.train()
 
     lr = config['learning_rate']
     if isinstance(lr, str):
         lr = float(lr)
 
-    optimizer = optim.Adam(net.parameters(), lr=config['learning_rate'])
-    scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=20, gamma=0.5)
+    optimizer = optim.Adam(net.parameters(), lr=lr)
+    scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer,
+                                                     'min', 
+                                                     factor=0.5, 
+                                                     patience=3,
+                                                     threshold=1e-5,
+                                                     threshold_mode='abs'
+                                                     )
     loss_func = nn.KLDivLoss(reduction='batchmean')
     n_epochs = config['n_epochs']
     epsilon = 1e-8
 
-    train_data_loader, test_batch, test_bin, test_edge = load_data()
+    data_filename = config['data_file']
+    train_data_loader, test_batch, test_bin, test_edge = load_data(data_filename)
 
     train_loss_arr = []
     test_loss_arr = []
@@ -106,7 +113,18 @@ if __name__ == "__main__":
         os.makedirs(run_path)
     log_path = os.path.join(run_path, 'log.txt')
 
-    for e in range(n_epochs):
+    architecture_path = os.path.join(run_path, "architecture.txt")
+    architecture =  '_'.join(str(e) for e in config['model_neurons'])
+    with open(architecture_path, 'a') as out_file:
+        out_file.write("Neural network architecture\n")
+        out_file.write(architecture)
+
+    model_name = "model_" + architecture + "t0_point_1.pt"
+    model_path = os.path.join('./files', model_name)
+
+    min_test_loss = 99999999999 # initialize to some large number
+
+    for epoch in range(n_epochs):
 
         train_loss_cum_sum = 0
         iters_per_epoch = 0
@@ -124,14 +142,31 @@ if __name__ == "__main__":
         
         test_loss = test_step(test_batch, test_bin)
         test_loss_arr.append(test_loss)
-        
+
         with open(log_path, 'a') as out_file:
             out_file.write("Epoch: {:d}, train loss: {:f}, test loss: {:f}\n"
-                .format(e, avg_train_loss, test_loss))
+                .format(epoch, avg_train_loss, test_loss))
 
-        scheduler.step()
+        torch.save(net.state_dict(), model_path)
+        scheduler.step(test_loss)
 
-        torch.save(net.state_dict(), './files/model.pt')
+        print(min_test_loss - test_loss)
+        if min_test_loss - test_loss > 1e-7:
+            epochs_no_improve = 0
+            min_test_loss = test_loss
+        else:
+            epochs_no_improve += 1
+
+        if epoch > 5 and epochs_no_improve == 5:
+            print('Early stopping!' )
+            break
+    
+    loss_path = "losses_" + architecture
+    loss_path = './files/losses_' + architecture
+    np.savez_compressed(loss_path,
+                        train_loss = train_loss_arr,
+                        test_loss = test_loss_arr
+                        )
 
     fig_path = os.path.join(run_path, 'training_curve.png')
     f = plt.figure()
