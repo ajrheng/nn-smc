@@ -2,9 +2,9 @@ t0: 10
 n_particles: 1000 # number of SMC particles (num of w points)
 n_bins: 50 # number of bins
 max_iters: 100 # maximum number of iterations before breaking
-n_runs: 1000
+n_runs: 100
 n_eff_thresh: 5e-5
-directory: ./run_logs
+directory: ./pass_fail_logs
 model_filename: model_500_250_50_t0_10.pt
-data_filename: data_t0_10_1000_runs
+data_filename: pass_fail_logs
 model_neurons: [500, 250, 50]

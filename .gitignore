@@ -4,6 +4,4 @@ files/
 __pycache__/
 *.py[cod]
 .vscode/
-*.ipynb
 figures/
-*passed_failed*

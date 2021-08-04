@@ -5,5 +5,5 @@ n_bins: 50 # number of bins
 max_iters: 100 # maximum number of iterations before breaking
 n_batch: 250 # number of points in a batch
 directory: ./files
-data_filename: data
+data_filename: data_t0_point_1
 

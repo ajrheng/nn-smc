@@ -1,4 +1,5 @@
-n_epochs: 10
+n_epochs: 1000
 learning_rate: 5e-5
+data_file: ./files/data_t0_point_1.npz
 directory: ./train_logs
-model_filename: model.pt
+model_neurons: [500, 250, 50]

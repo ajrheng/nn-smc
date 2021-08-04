@@ -7,6 +7,7 @@ import torch.optim as optim
 import matplotlib.pyplot as plt
 import yaml
 import os
+import pickle
 import argparse
 import seaborn as sns
 sns.set()
@@ -65,15 +66,21 @@ if __name__ == "__main__":
     true_omegas = []
     nn_preds = []
     nn_data = []
-    cred_reg_data = []
+    # cred_reg_data = []
     restart_list = []
-    crb_list = []
+    # crb_list = []
+
+    errors_overall = []
+    times_overall = []
 
     for i in range(n_runs): 
         
         true_omega = np.random.uniform(low=-1, high =1) * np.pi
         true_omegas.append(true_omega)
         restart_counts = 0
+
+        errors_in_run = []
+        times_in_run = []
         
         while True:
         
@@ -100,16 +107,21 @@ if __name__ == "__main__":
                     resample_counts += 1
 
             final_std = smc.std_list[-1]
+            errors_in_run.extend(smc.errors_list)
+            times_in_run.extend(smc.times_list)
             if final_std < n_eff_thresh:
                 break
 
             restart_counts += 1
             
+        errors_overall.append(errors_in_run)
+        times_overall.append(times_in_run)
+
         nn_data.append(smc.data)
         nn_preds.append(smc.curr_omega_est)
-        cred_reg_data.append(smc.cred_reg_list)
+        # cred_reg_data.append(smc.cred_reg_list)
         restart_list.append(restart_counts)
-        crb_list.append(smc.crb_list)
+        # crb_list.append(smc.crb_list)
         
         with open(log_path, 'a') as out_file:
             out_file.write("Run {:d} \n".format(i))
@@ -127,9 +139,9 @@ if __name__ == "__main__":
     nn_data_mean = np.mean(nn_data_sq, axis=0)
     nn_data_median = np.median(nn_data_sq, axis =0)
 
-    cred_reg_data = np.array(cred_reg_data).mean(axis=0)
-    cred_reg_min = cred_reg_data[:, 0]
-    cred_reg_max = cred_reg_data[:, 1]
+    # cred_reg_data = np.array(cred_reg_data).mean(axis=0)
+    # cred_reg_min = cred_reg_data[:, 0]
+    # cred_reg_max = cred_reg_data[:, 1]
 
     results_path = os.path.join(run_path, "results.txt")
     with open(results_path, 'a') as out_file:
@@ -141,7 +153,7 @@ if __name__ == "__main__":
     f = plt.figure()
     plt.plot(n_iters_arr, nn_data_mean, label='Mean')
     plt.plot(n_iters_arr, nn_data_median, label='Median')
-    plt.fill_between(n_iters_arr, cred_reg_max, cred_reg_min, alpha=0.4)
+    # plt.fill_between(n_iters_arr, cred_reg_max, cred_reg_min, alpha=0.4)
     plt.legend()
     plt.xlabel("Iterations")
     plt.ylabel("$(\omega - \omega*)^2$")
@@ -152,15 +164,24 @@ if __name__ == "__main__":
     f.savefig(fig_path, dpi=300)
 
     if args.resampler == 'nn':
-        result_path = './files/' + 'results_' + architecture
+        result_path = './files/results_' + architecture
+        errors_path = './files/e_' + architecture + '.pkl'
+        times_path = './files/t_' + architecture + '.pkl'
     elif args.resampler == 'bs':
         result_path = './files/results_bs'
     elif args.resampler == 'lw':
         result_path = './files/results_lw'
+        errors_path = './files/e.pkl'
+        times_path = './files/t.pkl'
 
-    np.savez_compressed(result_path,
-                        mean_se=nn_data_mean,
-                        median_se = nn_data_median,
-                        cred_reg_max = cred_reg_max,
-                        cred_reg_min = cred_reg_min
-                        )
+    # np.savez_compressed(result_path,
+    #                     mean_se=nn_data_mean,
+    #                     median_se = nn_data_median,
+    #                     # cred_reg_max = cred_reg_max,
+    #                     # cred_reg_min = cred_reg_min
+    #                     )
+
+    with open(errors_path, 'wb') as f:
+        pickle.dump(errors_overall, f)
+    with open(times_path, 'wb') as f:
+        pickle.dump(times_overall, f)
