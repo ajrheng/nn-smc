@@ -29,7 +29,8 @@ Next, to train the network, run
 python train_nn.py
 ```
 Training logs are stored in the `/train_logs` folder. Each time you run the code, a new folder with the timestamp will be created, and in it a
-`log.txt` file will be saved which logs the current training epoch and train/test loss and the los scurve `training_curve.png`. The model will also be saved periodically as `/files/model.pt`.
+`log.txt` file will be saved which logs the current training epoch and train/test loss. The model will also be saved periodically as `/files/[model_filename]`,
+where `[model_filename]` is an argument in the config file.
 
 ### Run SMC with NN resampler
 Finally, we can run the trained NN resampler with SMC. To run with the NN resampler, 
@@ -37,7 +38,7 @@ Finally, we can run the trained NN resampler with SMC. To run with the NN resamp
 python run.py --resampler nn
 ```
 Similarly, a folder with the timestamp is created in `/run_logs/nn`. Inside, `log.txt` outputs the current run and some basic information. After completion, 
-`results.txt` contains the overall MSE and average restarts, and a plot of the mean and median squared error is shown in `smc_results.png`.
+`results.txt` contains the overall MSE and average restarts.
 
 ## Liu-West and Bootstrap Resamplers
 For LW and BS, as there is no need for any training, we can proceed to run the resampler directly,

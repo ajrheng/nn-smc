@@ -4,4 +4,4 @@ max_iters: 100 # maximum number of iterations before breaking
 n_runs: 1000
 n_eff_thresh: 5e-5
 directory: ./run_logs
-data_filename: data_t0_point_1
+result_path: lw

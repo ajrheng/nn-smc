@@ -1,16 +1,10 @@
 import torch
 from datetime import datetime
-import torch.nn as nn
-import torch.nn.functional as F
 import numpy as np
-import torch.optim as optim
-import matplotlib.pyplot as plt
 import yaml
 import os
 import pickle
 import argparse
-import seaborn as sns
-sns.set()
 
 from src.nn import neural_network
 from src.smc import phase_est_smc
@@ -64,11 +58,9 @@ if __name__ == "__main__":
 
 
     true_omegas = []
-    nn_preds = []
-    nn_data = []
-    # cred_reg_data = []
+    preds = []
+    data = []
     restart_list = []
-    # crb_list = []
 
     errors_overall = []
     times_overall = []
@@ -117,11 +109,9 @@ if __name__ == "__main__":
         errors_overall.append(errors_in_run)
         times_overall.append(times_in_run)
 
-        nn_data.append(smc.data)
-        nn_preds.append(smc.curr_omega_est)
-        # cred_reg_data.append(smc.cred_reg_list)
+        data.append(smc.data)
+        preds.append(smc.curr_omega_est)
         restart_list.append(restart_counts)
-        # crb_list.append(smc.crb_list)
         
         with open(log_path, 'a') as out_file:
             out_file.write("Run {:d} \n".format(i))
@@ -135,13 +125,9 @@ if __name__ == "__main__":
 
 
     avg_restarts = np.mean(restart_list)
-    nn_data_sq = ( np.array(nn_data) - np.array(true_omegas).reshape(-1,1)) ** 2
+    nn_data_sq = ( np.array(data) - np.array(true_omegas).reshape(-1,1)) ** 2
     nn_data_mean = np.mean(nn_data_sq, axis=0)
     nn_data_median = np.median(nn_data_sq, axis =0)
-
-    # cred_reg_data = np.array(cred_reg_data).mean(axis=0)
-    # cred_reg_min = cred_reg_data[:, 0]
-    # cred_reg_max = cred_reg_data[:, 1]
 
     results_path = os.path.join(run_path, "results.txt")
     with open(results_path, 'a') as out_file:
@@ -150,36 +136,34 @@ if __name__ == "__main__":
 
     n_iters_arr = np.arange(max_iters, dtype=int)
 
-    f = plt.figure()
-    plt.plot(n_iters_arr, nn_data_mean, label='Mean')
-    plt.plot(n_iters_arr, nn_data_median, label='Median')
-    # plt.fill_between(n_iters_arr, cred_reg_max, cred_reg_min, alpha=0.4)
-    plt.legend()
-    plt.xlabel("Iterations")
-    plt.ylabel("$(\omega - \omega*)^2$")
-    plt.yscale('log')
-    plt.xlim([0, max_iters])
-    plt.tight_layout()
-    fig_path = os.path.join(run_path, "smc_results.png")
-    f.savefig(fig_path, dpi=300)
+    # f = plt.figure()
+    # plt.plot(n_iters_arr, nn_data_mean, label='Mean')
+    # plt.plot(n_iters_arr, nn_data_median, label='Median')
+    # plt.legend()
+    # plt.xlabel("Iterations")
+    # plt.ylabel("$(\omega - \omega*)^2$")
+    # plt.yscale('log')
+    # plt.xlim([0, max_iters])
+    # plt.tight_layout()
+    # fig_path = os.path.join(run_path, "smc_results.png")
+    # f.savefig(fig_path, dpi=300)
 
     if args.resampler == 'nn':
         result_path = './files/results_' + architecture
-        errors_path = './files/e_' + architecture + '.pkl'
-        times_path = './files/t_' + architecture + '.pkl'
+        errors_path = './files/errors_' + architecture + '.pkl'
+        times_path = './files/cumulative_times' + architecture + '.pkl'
     elif args.resampler == 'bs':
         result_path = './files/results_bs'
+        errors_path = './files/errors_bs.pkl'
+        times_path = './files/cumulative_times_bs.pkl'
     elif args.resampler == 'lw':
         result_path = './files/results_lw'
-        errors_path = './files/e.pkl'
-        times_path = './files/t.pkl'
+        errors_path = './files/errors_lw.pkl'
+        times_path = './files/cumulative_times_lw.pkl'
 
-    # np.savez_compressed(result_path,
-    #                     mean_se=nn_data_mean,
-    #                     median_se = nn_data_median,
-    #                     # cred_reg_max = cred_reg_max,
-    #                     # cred_reg_min = cred_reg_min
-    #                     )
+    np.savez_compressed(result_path,
+                        data = data
+                        )
 
     with open(errors_path, 'wb') as f:
         pickle.dump(errors_overall, f)

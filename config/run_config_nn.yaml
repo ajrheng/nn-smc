@@ -6,5 +6,5 @@ n_runs: 1000
 n_eff_thresh: 5e-5
 directory: ./run_logs
 model_filename: model_500_250_50_t0_10.pt
-data_filename: data_t0_10_1000_runs
+results_filename: results_500_250_50_t0_10
 model_neurons: [500, 250, 50]
