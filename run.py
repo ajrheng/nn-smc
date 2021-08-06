@@ -162,7 +162,8 @@ if __name__ == "__main__":
         times_path = './files/cumulative_times_lw.pkl'
 
     np.savez_compressed(result_path,
-                        data = data
+                        data = data,
+                        true_omegas = true_omegas
                         )
 
     with open(errors_path, 'wb') as f:

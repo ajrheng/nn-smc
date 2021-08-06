@@ -1,5 +1,5 @@
-# TITLE OF PROJECT
-This is the repository for the Masters thesis: Neural Network Resamplers for Quantum Phase Estimation.
+# Neural Network Resamplers for Quantum Phase Estimation
+This is the repository for the Masters thesis: Neural Network Resamplers for Quantum Phase Estimation at the University of Toronto.
 
 ## Setup
 Run `pip install -r requirements.txt` to install the prerequisites. It is advised to do inside a virtual environment.
@@ -29,7 +29,7 @@ Next, to train the network, run
 python train_nn.py
 ```
 Training logs are stored in the `/train_logs` folder. Each time you run the code, a new folder with the timestamp will be created, and in it a
-`log.txt` file will be saved which logs the current training epoch and train/test loss. The model will also be saved periodically as `/files/[model_filename]`,
+`log.txt` file will be saved which logs the current training epoch and train/test loss. The model will also be saved periodically as `/files/model_[architecture].pt`,
 where `[model_filename]` is an argument in the config file.
 
 ### Run SMC with NN resampler
@@ -38,11 +38,12 @@ Finally, we can run the trained NN resampler with SMC. To run with the NN resamp
 python run.py --resampler nn
 ```
 Similarly, a folder with the timestamp is created in `/run_logs/nn`. Inside, `log.txt` outputs the current run and some basic information. After completion, 
-`results.txt` contains the overall MSE and average restarts.
+`results.txt` contains the overall MSE and average restarts. Data will be written to './files/[results_filename]', where `[results_filename]` is specified in the config.
+Files for errors and cumulative times over all restarts will also be written with `.pkl` extensions.
 
 ## Liu-West and Bootstrap Resamplers
 For LW and BS, as there is no need for any training, we can proceed to run the resampler directly,
 ```
 python run.py --resampler [lw,bs]
 ```
-Identical to the NN resampler, the same outputs are stored in `/run_logs/lw` or `/run_logs/bs`.
+Identical to the NN resampler, the same outputs are stored in `/run_logs/lw` or `/run_logs/bs`. Data will be written to `./files/results_[lw/bs].pt`.
