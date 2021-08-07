@@ -21,9 +21,6 @@ class phase_est_smc:
         self.curr_omega_est = 0 # best current estimate of omega
         self.rng = np.random.default_rng()
 
-        self.errors_list = []
-        self.times_list = []
-
     def init_particles(self, num_particles):
         """
         Initializes the particles for SMC.
@@ -78,9 +75,6 @@ class phase_est_smc:
             # self.curr_omega_est = self.particle_pos[np.argmax(self.particle_wgts)]
             avg = np.average(self.particle_pos, weights = self.particle_wgts)
             self.curr_omega_est = avg
-
-            self.errors_list.append((self.curr_omega_est-self.true_omega)**2)
-            self.times_list.append(self.t)
 
             # exit condition
             self.counter += 1
@@ -168,15 +162,4 @@ class phase_est_smc:
         
         self.particle_pos = np.array(particle_pos)
         self.particle_wgts = np.ones_like(self.particle_pos) / self.num_particles
-
-    def credible_region(self,  level=0.95):
-
-        id_sort = np.argsort(self.particle_wgts)[::-1]
-
-        cumsum_weights = np.cumsum(self.particle_wgts[id_sort])
-
-        id_cred = cumsum_weights <= level
-        id_cred[np.sum(id_cred)] = True
-
-        return self.particle_pos[id_sort][id_cred]
 

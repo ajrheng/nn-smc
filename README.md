@@ -47,3 +47,6 @@ For LW and BS, as there is no need for any training, we can proceed to run the r
 python run.py --resampler [lw,bs]
 ```
 Identical to the NN resampler, the same outputs are stored in `/run_logs/lw` or `/run_logs/bs`. Data will be written to `./files/results_[lw/bs].pt`.
+
+## Plotting
+A sample notebook on how to plot the data is shown in `example_plotting_notebook.ipynb`.

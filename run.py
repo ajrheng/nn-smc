@@ -48,7 +48,7 @@ if __name__ == "__main__":
         architecture =  '_'.join(str(e) for e in config['model_neurons'])
         with open(architecture_path, 'a') as out_file:
             out_file.write("Neural network architecture\n")
-            out_file.write(architecture )
+            out_file.write(architecture)
 
         units = config['model_neurons']
         model_path = './files/' + config['model_filename']
@@ -62,17 +62,12 @@ if __name__ == "__main__":
     data = []
     restart_list = []
 
-    errors_overall = []
-    times_overall = []
-
     for i in range(n_runs): 
         
         true_omega = np.random.uniform(low=-1, high =1) * np.pi
         true_omegas.append(true_omega)
         restart_counts = 0
 
-        errors_in_run = []
-        times_in_run = []
         
         while True:
         
@@ -99,15 +94,10 @@ if __name__ == "__main__":
                     resample_counts += 1
 
             final_std = smc.std_list[-1]
-            errors_in_run.extend(smc.errors_list)
-            times_in_run.extend(smc.times_list)
             if final_std < n_eff_thresh:
                 break
 
             restart_counts += 1
-            
-        errors_overall.append(errors_in_run)
-        times_overall.append(times_in_run)
 
         data.append(smc.data)
         preds.append(smc.curr_omega_est)
@@ -133,28 +123,9 @@ if __name__ == "__main__":
     with open(results_path, 'a') as out_file:
         out_file.write("Restart counts {}\n".format(avg_restarts))
         out_file.write("MSE: {}, Median: {}\n".format(nn_data_mean[-1], nn_data_median[-1]))
-
-    n_iters_arr = np.arange(max_iters, dtype=int)
-
-    if args.resampler == 'nn':
-        result_path = './files/results_' + architecture
-        errors_path = './files/errors_' + architecture + '.pkl'
-        times_path = './files/cumulative_times_' + architecture + '.pkl'
-    elif args.resampler == 'bs':
-        result_path = './files/results_bs'
-        errors_path = './files/errors_bs.pkl'
-        times_path = './files/cumulative_times_bs.pkl'
-    elif args.resampler == 'lw':
-        result_path = './files/results_lw'
-        errors_path = './files/errors_lw.pkl'
-        times_path = './files/cumulative_times_lw.pkl'
-
-    np.savez_compressed(result_path,
+    
+    results_path = './files/' + config['results_filename']
+    np.savez_compressed(results_path,
                         data = data,
                         true_omegas = true_omegas
                         )
-
-    with open(errors_path, 'wb') as f:
-        pickle.dump(errors_overall, f)
-    with open(times_path, 'wb') as f:
-        pickle.dump(times_overall, f)
