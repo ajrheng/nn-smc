@@ -3,8 +3,7 @@ from .functions import (
     prob_zero,
     prob_one,
     weighted_std,
-    second_deriv_log_prob_zero,
-    second_deriv_log_prob_one)
+)
 from .getdatahelper import (
     make_batch
 )
@@ -21,9 +20,6 @@ class phase_est_smc:
         self.max_iters = max_iters
         self.curr_omega_est = 0 # best current estimate of omega
         self.rng = np.random.default_rng()
-        # self.cred_reg_list = []
-        # self.crb_list = []
-        # self.prev_fisher_info = 0
 
         self.errors_list = []
         self.times_list = []
@@ -78,27 +74,7 @@ class phase_est_smc:
             # store standard deviation of run
             std = weighted_std(self.particle_pos, self.particle_wgts)
             self.std_list.append(std)
-
-            # update CRB
-            # if measure_list[0] == 0:
-            #     deriv_log_likelihood = deriv_log_prob_zero(self.particle_pos, phi_k, self.t)
-            # else:
-            #     deriv_log_likelihood = deriv_log_prob_one(self.particle_pos, phi_k, self.t)
-            # fisher_info_ = deriv_log_likelihood ** 2
-            # fisher_info = np.mean(fisher_info_) + self.prev_fisher_info
-            # self.prev_fisher_info = fisher_info
-            # self.crb_list.append(1/fisher_info)
-
-            # fisher_info_0 = prob_zero(self.particle_pos, phi, self.t) * second_deriv_log_prob_zero(self.particle_pos, phi, self.t)
-            # fisher_info_1 = prob_one(self.particle_pos, phi, self.t) * second_deriv_log_prob_one(self.particle_pos, phi, self.t)
-            # fisher_info = -(fisher_info_0 + fisher_info_1).mean()# + self.prev_fisher_info
-            #self.prev_fisher_info = fisher_info
-            # self.crb_list.append(1/fisher_info)
-
-            # update credible region
-            # cred_reg = (self.credible_region() - self.true_omega)**2
-            # self.cred_reg_list.append((cred_reg.min(), cred_reg.max()))
-            
+          
             # self.curr_omega_est = self.particle_pos[np.argmax(self.particle_wgts)]
             avg = np.average(self.particle_pos, weights = self.particle_wgts)
             self.curr_omega_est = avg

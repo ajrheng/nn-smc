@@ -136,22 +136,10 @@ if __name__ == "__main__":
 
     n_iters_arr = np.arange(max_iters, dtype=int)
 
-    # f = plt.figure()
-    # plt.plot(n_iters_arr, nn_data_mean, label='Mean')
-    # plt.plot(n_iters_arr, nn_data_median, label='Median')
-    # plt.legend()
-    # plt.xlabel("Iterations")
-    # plt.ylabel("$(\omega - \omega*)^2$")
-    # plt.yscale('log')
-    # plt.xlim([0, max_iters])
-    # plt.tight_layout()
-    # fig_path = os.path.join(run_path, "smc_results.png")
-    # f.savefig(fig_path, dpi=300)
-
     if args.resampler == 'nn':
         result_path = './files/results_' + architecture
         errors_path = './files/errors_' + architecture + '.pkl'
-        times_path = './files/cumulative_times' + architecture + '.pkl'
+        times_path = './files/cumulative_times_' + architecture + '.pkl'
     elif args.resampler == 'bs':
         result_path = './files/results_bs'
         errors_path = './files/errors_bs.pkl'

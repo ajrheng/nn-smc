@@ -38,7 +38,7 @@ Finally, we can run the trained NN resampler with SMC. To run with the NN resamp
 python run.py --resampler nn
 ```
 Similarly, a folder with the timestamp is created in `/run_logs/nn`. Inside, `log.txt` outputs the current run and some basic information. After completion, 
-`results.txt` contains the overall MSE and average restarts. Data will be written to './files/[results_filename]', where `[results_filename]` is specified in the config.
+`results.txt` contains the overall MSE and average restarts. Data will be written to `./files/[results_filename]`, where `[results_filename]` is specified in the config.
 Files for errors and cumulative times over all restarts will also be written with `.pkl` extensions.
 
 ## Liu-West and Bootstrap Resamplers
